@@ -20,3 +20,9 @@ _cgo_export.*
 _testmain.go
 
 *.exe
+
+# HTML output directory
+/html
+
+# working files in directory doc
+/doc/*.html
