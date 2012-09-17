@@ -1,9 +1,8 @@
 /*
- * $Header: /vol/nasrd/Projects/0x10c/dcpu-16/go/src/d16/cpu/RCS/cpu.go,v 1.2 2012/09/16 13:27:26 radek Exp radek $
  * DCPU16 emulator.
  * Main file.
  * Copyright (c) 2012 Radek Hnilica
- *
+ * Licence: GPLv3
  */
 package cpu;
 
@@ -170,6 +169,9 @@ func (c *Cpu) Step() {
 	case 16: // IFB
 		c.cycle += 2
 		c.skip = ! (*destination & source != 0)
+	case 17: // IFC
+		c.cycle += 2
+		c.skip = ! (*destination & source == 0)
 	}
 
 	/*
@@ -202,7 +204,8 @@ func (c *Cpu) decode_source(code Word) (value Word) {
 
 /*
  * decode_destination decodes destination operand and return pointers
- * to it
+ * to it.  This code is inspired by Scott Fergusons
+ * [dcpu16-go](git://github.com/dcpu16/dcpu16-go.git).
  */
 func (c *Cpu) decode_destination(code Word) (refference *Word) {
 	switch code {

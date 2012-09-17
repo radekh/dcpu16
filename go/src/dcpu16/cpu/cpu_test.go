@@ -932,3 +932,47 @@ func Test_Instruction_IFB(t *testing.T) {
 	if c.regPC != 7 {t.Errorf("Fail: PC is %#.4x and should be 0x0007\n", c.regPC)}
 	if c.regC  != 3 {t.Errorf("Fail: C  is %#.4x and should be 0x0003\n", c.regC)}
 }
+
+
+
+/* Testing IFC
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=r1f09n
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=yrzx7p
+ *      
+0x0000:                     ; Testing Instruction IFC
+0x0000:                     ; True -- NoSkip
+0x0000: 9c21                    set b,0x0006        ;cyc=1
+0x0001: a431                    ifc b,0x0008        ;cyc=2+0
+0x0002: 8801                    set a,1 ;must be executed; cyc=1
+0x0003:                     ; result:   a=1
+0x0003:                     ; F1DE:     a=1
+0x0003:                     ; False -- Skip
+0x0003: 9431                    ifc b,0x0004        ;cyc=2+1
+0x0004: 7c01 2222               set a,0x2222 ;must NOT be executed; cyc=0
+0x0006:                     ; result:   a=1
+0x0006:                     ; F1DE:     a=1
+0x0006: 9041                    set c,3             ;cyc=1
+ */
+func Test_Instruction_IFC(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x9c21
+	c.memory[1] = 0xa431
+	c.memory[2] = 0x8801
+	c.memory[3] = 0x9431
+	c.memory[4] = 0x7c01; c.memory[5] = 0x2222
+	c.memory[6] = 0x9041
+	c.Step(); c.Step()	// set,ifc
+	if c.cycle != 3 {t.Errorf("Fail: cycle is %d and should be 3\n", c.cycle)}
+	if c.regPC != 2 {t.Errorf("Fail: PC is %#.4x and should be 0x0002\n", c.regPC)}
+	c.Step()		// set a,1
+	if c.cycle != 4 {t.Errorf("Fail: cycle is %d and should be 4\n", c.cycle)}
+	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
+	c.Step()		// ifc b,0x0008
+	if c.cycle != 7 {t.Errorf("Fail: cycle is %d and should be 7\n", c.cycle)}
+	if c.regPC != 6 {t.Errorf("Fail: PC is %#.4x and should be 0x0006\n", c.regPC)}
+	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
+	c.Step()		// set c,3
+	if c.cycle != 8 {t.Errorf("Fail: cycle is %d and should be 8\n", c.cycle)}
+	if c.regPC != 7 {t.Errorf("Fail: PC is %#.4x and should be 0x0007\n", c.regPC)}
+	if c.regC  != 3 {t.Errorf("Fail: C  is %#.4x and should be 0x0003\n", c.regC)}
+}
