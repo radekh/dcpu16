@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Extend GOPATH if not yet extended.
+if ! echo $GOPATH| grep $(pwd) >/dev/null; then
+    export GOPATH=$(pwd):$GOPATH
+fi

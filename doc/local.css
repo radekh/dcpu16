@@ -1,0 +1,38 @@
+/*
+ * $Id$
+ * Modification to markdown stylesheet.
+ * Copyright (c) 2012 Radek Hnilica
+ */
+
+/*
+ * Titles formating
+ */
+body h1 { font-size: 32px; }
+body h2 { font-size: 26px; }
+body h3 { font-size: 21px; }
+body h4 { font-size: 17px; }
+body h5 { font-size: 14px; }
+body h6 { font-size: 12px; }
+
+/*
+ * Table formating
+ */
+caption { font-size: 200%; }
+table   { border-collapse: collapse; Xborder: 1px solid red; }
+td,th   { border: 1px solid gray; padding: 4px 12px; }
+th      { }
+
+/*
+ *
+ */
+pre {
+    Xwhite-space: pre-wrap;
+
+    Xmargin: 1px 24px; padding: 2px 24px;
+    border: 1px dashed #ddd;
+    color: #11a; background: #f8f8f8;
+}
+
+p code {
+    color: #02c;
+}
