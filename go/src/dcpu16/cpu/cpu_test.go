@@ -1099,3 +1099,33 @@ func Test_Instruction_IFA(t *testing.T) {
 	if c.regPC != 8 {t.Errorf("Fail: PC is %#.4x and should be 0x0008\n", c.regPC)}
 	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
 }
+
+/*
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=9wmtns
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=ps7xk9
+ *
+0x0000:                     ; Testing Instruction IFL
+0x0000:                     ; True -- NoSkip
+0x0000: b021                    set b,11        ;cyc=1
+0x0001: b436                    ifl b,12        ;cyc=2+0
+0x0002: 8801                    set a,1 ;must be executed; cyc=1
+0x0003:                     ; Checkpoint: a=1
+0x0003: b036                    ifl b,11        ;cyc=2+1
+0x0004: 8c01                    set a,2 ;must NOT be executed; cyc=0
+0x0005:                     ; Checkpoint a=1
+ */
+func Test_Instruction_IFL(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0xb021
+	c.memory[1] = 0xb436
+	c.memory[2] = 0x8801
+	c.memory[3] = 0xb036
+	c.memory[4] = 0x8c01
+	c.Step(); c.Step(); c.Step()	// set,ifl,set
+	if c.cycle != 4 {t.Errorf("Fail: cycle is %d and should be 4\n", c.cycle)}
+	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
+	c.Step() // ifl, skip set
+	if c.cycle != 7 {t.Errorf("Fail: cycle is %d and should be 7\n", c.cycle)}
+	if c.regPC != 5 {t.Errorf("Fail: PC is %#.4x and should be 0x0005\n", c.regPC)}
+	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
+}
