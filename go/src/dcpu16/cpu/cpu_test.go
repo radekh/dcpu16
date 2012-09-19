@@ -1,8 +1,8 @@
 /*
- * $Header: /vol/nasrd/Projects/0x10c/dcpu-16/go/src/d16/cpu/RCS/cpu_test.go,v 1.2 2012/09/16 13:27:46 radek Exp radek $
+ * $Header$
  * Unit tests.
  * Copyright (c) 2012 Radek Hnilica
- *
+ * License: GPLv3 or at your opinion higher.
  */
 package cpu
 
