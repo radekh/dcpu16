@@ -493,6 +493,21 @@ func Test_Instruction_DIV_65001_100(t *testing.T) {
 	}
 }
 
+func Benchmark_DIV_65001_100(b *testing.B) {
+	b.StopTimer()
+	c := New(); c.Reset()
+	c.memory[0] = 0x7c21
+	c.memory[1] = 0xfde9
+	c.memory[2] = 0x7c26
+	c.memory[3] = 0x0064
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		c.regPC = 0
+		c.regB  = 65001
+		c.Step()
+	}	
+}
+
 /*
 0x0000:                     ; Testing DIV 3/0
 0x0000: 9021                    set b, 3
