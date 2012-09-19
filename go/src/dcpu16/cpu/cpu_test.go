@@ -1164,7 +1164,7 @@ func Test_Instruction_IFU(t *testing.T) {
 	if c.regPC != 8 {t.Errorf("Fail: PC is %#.4x and should be 0x0008\n", c.regPC)}
 	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
 	c.Step(); c.Step()	//  ifu,set
-	if c.cycle != 12 {t.Errorf("Fail: cycle is %d and should be 12\n", c.cycle)}
+	if c.cycle != 13 {t.Errorf("Fail: cycle is %d and should be 13\n", c.cycle)}
 	if c.regPC != 10 {t.Errorf("Fail: PC is %#.4x and should be 0x000a\n", c.regPC)}
 	if c.regA  != 3  {t.Errorf("Fail: A  is %#.4x and should be 0x0003\n", c.regA)}
 }
