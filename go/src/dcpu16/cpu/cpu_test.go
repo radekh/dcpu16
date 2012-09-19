@@ -1134,9 +1134,7 @@ func Test_Instruction_IFL(t *testing.T) {
  PRIV: http://fasm.elasticbeanstalk.com/?proj=bvr3hy
  PUB:  http://fasm.elasticbeanstalk.com/?proj=tsw62b
  *
-
-	     
-	    0x0000:                     ; Testing Instruction IFU
+0x0000:                     ; Testing Instruction IFU
 0x0000:                     ; True -- NoSkip
 0x0000: 7c21 fffa               set b,-6        ;cyc=2
 0x0002: 7c37 fffb               ifu b,-5        ;cyc=3+0
@@ -1145,6 +1143,9 @@ func Test_Instruction_IFL(t *testing.T) {
 0x0005: 7c37 fffa               ifu b,-6        ;cyc=3+1
 0x0007: 8c01                    set a,2 ;must NOT be executed; cyc=0
 0x0008:                     ; Checkpoint a=1
+0x0008: 8437                    ifu b,0         ;cyc=2+0
+0x0009: 9001                    set a,3         ;cyc=1
+0x000a:                     ; Checkpoint a=3
  */
 func Test_Instruction_IFU(t *testing.T) {
 	c := New(); c.Reset()
@@ -1153,6 +1154,8 @@ func Test_Instruction_IFU(t *testing.T) {
 	c.memory[4] = 0x8801
 	c.memory[5] = 0x7c37; c.memory[6] = 0xfffa
 	c.memory[7] = 0x8c01
+	c.memory[8] = 0x8437
+	c.memory[9] = 0x9001
 	c.Step(); c.Step(); c.Step()	// set,ifu,set
 	if c.cycle != 6 {t.Errorf("Fail: cycle is %d and should be 6\n", c.cycle)}
 	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
@@ -1160,4 +1163,8 @@ func Test_Instruction_IFU(t *testing.T) {
 	if c.cycle != 10 {t.Errorf("Fail: cycle is %d and should be 10\n", c.cycle)}
 	if c.regPC != 8 {t.Errorf("Fail: PC is %#.4x and should be 0x0008\n", c.regPC)}
 	if c.regA  != 1 {t.Errorf("Fail: A  is %#.4x and should be 0x0001\n", c.regA)}
+	c.Step(); c.Step()	//  ifu,set
+	if c.cycle != 12 {t.Errorf("Fail: cycle is %d and should be 12\n", c.cycle)}
+	if c.regPC != 10 {t.Errorf("Fail: PC is %#.4x and should be 0x000a\n", c.regPC)}
+	if c.regA  != 3  {t.Errorf("Fail: A  is %#.4x and should be 0x0003\n", c.regA)}
 }
