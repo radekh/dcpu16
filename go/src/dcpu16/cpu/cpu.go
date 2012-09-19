@@ -172,7 +172,20 @@ func (c *Cpu) Step() {
 	case 17: // IFC
 		c.cycle += 2
 		c.skip = ! (*destination & source == 0)
+	case 18: // IFE
+		c.cycle += 2
+		c.skip = ! (*destination == source)
+	case 19: // IFN
+		c.cycle += 2
+		c.skip = ! (*destination != source)
+	case 20: // IFG
+		c.cycle += 2
+		c.skip = ! (*destination > source)
+	case 21: // IFA
+		c.cycle += 2
+		c.skip = ! (SWord(*destination) > SWord(source))
 	}
+
 
 	/*
          * The instruction was executed and is finished.  Except if it
