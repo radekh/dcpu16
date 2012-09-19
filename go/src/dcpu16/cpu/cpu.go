@@ -184,6 +184,9 @@ func (c *Cpu) Step() {
 	case 21: // IFA
 		c.cycle += 2
 		c.skip = ! (SWord(*destination) > SWord(source))
+	case 22: // IFL
+		c.cycle += 2
+		c.skip = ! (*destination < source)
 	}
 
 
