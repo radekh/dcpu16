@@ -1222,3 +1222,19 @@ func Test_Instruction_ADX(t *testing.T) {
 	if c.regPC != 7     {t.Errorf("Fail: PC is %#.4x and should be 0x0007\n", c.regPC)}
 
 }
+
+func Benchmark_ADX_0xFFFF(b *testing.B) {
+	b.StopTimer()
+	c := New(); c.Reset()
+	c.memory[0] = 0x8b10	                        // set ex,1
+	c.memory[1] = 0x7c01; c.memory[2] = 0x00ea      // set a,234
+	c.memory[3] = 0x801a				// adx a,0xffff
+	c.memory[4] = 0x801a				// adx a,0xffff
+	c.Step(); c.Step()
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		c.regPC = 3
+		c.Step()
+		//c.Step()
+	}	
+}

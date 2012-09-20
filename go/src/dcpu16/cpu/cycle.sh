@@ -4,6 +4,6 @@
 while :;do
     date +%T
     go test -bench=".*"
-    sleep 1m
-    echo -e "----------\n"
+    sleep 2m
+    echo -e "--------------------\n"
 done

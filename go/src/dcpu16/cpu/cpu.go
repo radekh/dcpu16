@@ -191,9 +191,12 @@ func (c *Cpu) Step() {
 		c.cycle += 2
 		c.skip = ! (SWord(*destination) < SWord(source))
 
-	case 26: // ADX? b=b+a+ex, if overflow ex=1 else ex=0
+	//case 24: No Instruction
+	//case 25: No Instruction
+
+	case 26: // ADX: b=b+a+ex, if overflow ex=1 else ex=0
 		c.cycle +=3
-		result := int32(*destination) + int32(source) + int32(c.regEX)
+		result := uint32(*destination) + uint32(source) + uint32(c.regEX)
 		*destination = Word(result)
 		c.regEX = Word(result >>16)
 	}
