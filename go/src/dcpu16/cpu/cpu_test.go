@@ -1183,3 +1183,42 @@ func Test_Instruction_IFU(t *testing.T) {
 	if c.regPC != 10 {t.Errorf("Fail: PC is %#.4x and should be 0x000a\n", c.regPC)}
 	if c.regA  != 3  {t.Errorf("Fail: A  is %#.4x and should be 0x0003\n", c.regA)}
 }
+
+/* Testing instruction ADX
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=w82jxh
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=yy3kj9
+ *
+0x0000:                     ; Testing Instruction ADX
+0x0000: 8ba1                    set ex,1        ;cyc=1
+0x0001: 7c01 00ea               set a,234       ;cyc=1+1
+0x0003: 7c1a 01e2               adx a,482       ;cyc=3+1
+0x0005:                     ; Checkpoint: a=717,ex=0
+0x0005: 801a                    adx a,0xffff
+0x0006:                     ; Checkpoint: a=716,ex=1
+0x0006: 801a                    adx a,0xffff
+0x0007:                     ; Checkpoint: a=715,ex=1
+ */
+func Test_Instruction_ADX(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x8ba1
+	c.memory[1] = 0x7c01; c.memory[2] = 0x00ea
+	c.memory[3] = 0x7c1a; c.memory[4] = 0x01e2
+	c.memory[5] = 0x801a
+	c.memory[6] = 0x801a
+	c.Step(); c.Step(); c.Step()	// set,set,adx
+	if c.cycle != 7     {t.Errorf("Fail: cycle is %d and should be 7\n", c.cycle)}
+	if c.regA  != 0x2cd {t.Errorf("Fail: A  is %#.4x and should be 0x02cd\n", c.regA)}
+	if c.regEX != 0     {t.Errorf("Fail: EX is %#.4x and should be 0x0000\n", c.regEX)}
+
+	c.Step()
+	if c.cycle != 10    {t.Errorf("Fail: cycle is %d and should be 10\n", c.cycle)}
+	if c.regA  != 0x2cc {t.Errorf("Fail: A  is %#.4x and should be 0x02cc\n", c.regA)}
+	if c.regEX != 1     {t.Errorf("Fail: EX is %#.4x and should be 0x0001\n", c.regEX)}
+
+	c.Step()
+	if c.cycle != 13    {t.Errorf("Fail: cycle is %d and should be 13\n", c.cycle)}
+	if c.regA  != 0x2cc {t.Errorf("Fail: A  is %#.4x and should be 0x02cc\n", c.regA)}
+	if c.regEX != 1     {t.Errorf("Fail: EX is %#.4x and should be 0x0001\n", c.regEX)}
+	if c.regPC != 7     {t.Errorf("Fail: PC is %#.4x and should be 0x0007\n", c.regPC)}
+
+}
