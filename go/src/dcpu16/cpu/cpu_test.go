@@ -1238,3 +1238,40 @@ func Benchmark_ADX_0xFFFF(b *testing.B) {
 		//c.Step()
 	}	
 }
+
+/* Testing instruction SBX
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=sf1my3
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=h95cgk
+ *
+0x0000:                     ; Testing Instruction SBX
+0x0000: 83a1                    set ex,0xffff   ;cyc=1
+0x0001: 7c01 00ea               set a,234       ;cyc=1+1
+0x0003: 901b                    sbx a,3         ;cyc=3
+0x0004:                     ; Checkpoint: a=230,ex=0
+0x0004: 901b                    sbx a,3         ;cyc=3
+0x0005:                     ; Checkpoint: a=227,ex=0
+0x0005: 7c1b 00e6               sbx a,230       ;cyc=3+1
+0x0007:                     ; Checkpoint: a=0xfffd=-3,ex=0xffff
+ */
+func Test_Instruction_SBX(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x83a1
+	c.memory[1] = 0x7c01; c.memory[2] = 0x00ea
+	c.memory[3] = 0x901b
+	c.memory[4] = 0x901b
+	c.memory[5] = 0x7c1b; c.memory[6] = 0x00e6
+	c.Step(); c.Step(); c.Step()	// set,set,sbx
+	if c.cycle != 6      {t.Errorf("Fail: cycle is %d and should be 6\n", c.cycle)}
+	if c.regA  != 0x00e6 {t.Errorf("Fail: A  is %#.4x and should be 0x00e6\n", c.regA)}
+	if c.regEX != 0      {t.Errorf("Fail: EX is %#.4x and should be 0x0000\n", c.regEX)}
+
+	c.Step()
+	if c.cycle != 9      {t.Errorf("Fail: cycle is %d and should be 9\n", c.cycle)}
+	if c.regA  != 0x00e3 {t.Errorf("Fail: A  is %#.4x and should be 0x00e3\n", c.regA)}
+	if c.regEX != 0      {t.Errorf("Fail: EX is %#.4x and should be 0x0000\n", c.regEX)}
+
+	c.Step()
+	if c.cycle != 13     {t.Errorf("Fail: cycle is %d and should be 13\n", c.cycle)}
+	if c.regA  != 0xfffd {t.Errorf("Fail: A  is %#.4x and should be 0xfffd\n", c.regA)}
+	if c.regEX != 0xffff {t.Errorf("Fail: EX is %#.4x and should be 0xffff\n", c.regEX)}
+}
