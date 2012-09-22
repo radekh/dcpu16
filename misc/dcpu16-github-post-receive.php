@@ -5,6 +5,8 @@
    * For project dcpu16
    */
 
+$LOGDIR='/var/log/github'
+
 # Turn off error reporting
 error_reporting(0);
 
@@ -14,6 +16,9 @@ try {
 } catch(Exception $e) {
 	exit;
 }
+
+file_put_contents('logs/github0.txt', 'Payload:', FILE_APPEND);
+file_put_contents('logs/github0.txt', print_r($payload, TRUE), FILE_APPEND);
 
 # Pushed to master?
 if ($payload->ref === 'refs/heads/master') {
