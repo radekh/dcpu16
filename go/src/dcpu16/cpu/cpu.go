@@ -90,6 +90,13 @@ func (c *Cpu) Step() {
 
 	// *** EXECUTE ***
 	switch opcode {
+	case 0: // Single operand instructions
+		switch (instruction >> 5) & 0x1f {
+		case 1: // JSR a
+			c.cycle += 3
+			c.regSP--; c.memory[c.regSP] = c.regPC
+			c.regPC = source
+		}
 	case 1: // SET: C=1
 		c.cycle++
 		*destination = source

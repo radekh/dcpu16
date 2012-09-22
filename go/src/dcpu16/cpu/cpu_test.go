@@ -1325,3 +1325,28 @@ func Test_Instruction_STD(t *testing.T) {
 	if c.regI  != 0x0005 {t.Errorf("Fail: I  is %#.4x and should be 0x0005\n", c.regI)}
 	if c.regJ  != 0x0007 {t.Errorf("Fail: I  is %#.4x and should be 0x0007\n", c.regJ)}
 }
+
+
+/* Testing instruction JSR
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=5jzm2n
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=v99xx9
+ *
+0x0000:                     ; Testing Instruction JSR
+0x0000: 7f61 0040               set sp,0x40     ;cyc=2
+0x0002: 9020                    jsr routine
+0x0003:                     ; Checkpoint: a=0x0a=10,i=5,j=7
+0x0003:                     
+0x0003:                     :routine
+0x0003: 9801                    set a,5
+ */
+func Test_Instruction_JSR(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x7f61; c.memory[1] = 0x0040
+	c.memory[2] = 0x9020
+	c.memory[3] = 0x9801
+	c.memory[4] = 0xffff
+	c.Step(); c.Step()	// set,jsr
+	if c.cycle != 5      {t.Errorf("Fail: cycle is %d and should be 5\n", c.cycle)}
+	if c.regPC != 0x0003 {t.Errorf("Fail: PC  is %#.4x and should be 0x0003\n", c.regPC)}
+	if c.regSP != 0x003f {t.Errorf("Fail: SP  is %#.4x and should be 0x003f\n", c.regSP)}
+}
