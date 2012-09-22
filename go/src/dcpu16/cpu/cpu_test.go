@@ -1301,3 +1301,27 @@ func Test_Instruction_STI(t *testing.T) {
 	if c.regI  != 0x0007 {t.Errorf("Fail: I  is %#.4x and should be 0x0007\n", c.regI)}
 	if c.regJ  != 0x0009 {t.Errorf("Fail: I  is %#.4x and should be 0x0009\n", c.regJ)}
 }
+
+/* Testing instruction STD
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=jwvdkd
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=j9zmxw
+ *
+0x0000:                     ; Testing Instruction STD
+0x0000: 9cc1                    set i,6         ;cyc=1
+0x0001: a4e1                    set j,8         ;cyc=1
+0x0002: ac21                    set b,10        ;cyc=1
+0x0003: 041f                    std a,b         ;cyc=2
+0x0004:                     ; Checkpoint: a=0x0a=10,i=5,j=7
+ */
+func Test_Instruction_STD(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x9cc1
+	c.memory[1] = 0xa4e1
+	c.memory[2] = 0xac21
+	c.memory[3] = 0x041f
+	c.Step(); c.Step(); c.Step(); c.Step()	// set,set,set,sti
+	if c.cycle != 5      {t.Errorf("Fail: cycle is %d and should be 5\n", c.cycle)}
+	if c.regA  != 0x000a {t.Errorf("Fail: A  is %#.4x and should be 0x000a\n", c.regA)}
+	if c.regI  != 0x0005 {t.Errorf("Fail: I  is %#.4x and should be 0x0005\n", c.regI)}
+	if c.regJ  != 0x0007 {t.Errorf("Fail: I  is %#.4x and should be 0x0007\n", c.regJ)}
+}

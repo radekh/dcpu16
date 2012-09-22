@@ -212,6 +212,10 @@ func (c *Cpu) Step() {
 		c.cycle +=2
 		*destination = source
 		c.regI++; c.regJ++
+	case 31: // STD:
+		c.cycle +=2
+		*destination = source
+		c.regI--; c.regJ--
 	}
 
 
