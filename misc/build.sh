@@ -7,7 +7,7 @@ git clone -q "${1}" "clones/${2}"
 cd "clones/${2}"
 
 # update the submodules (how do we handle errors here?)
-git submodule --quiet update --init --recursive
+# git submodule --quiet update --init --recursive
 
 cd ../../
 
