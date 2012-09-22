@@ -204,6 +204,14 @@ func (c *Cpu) Step() {
 		result := int32(*destination) - int32(source) + int32(SWord(c.regEX))
 		*destination = Word(result)
 		c.regEX = Word(result >>16)
+
+	//case 28: No Instruction
+	//case 29: No Instruction
+
+	case 30: // STI:
+		c.cycle +=2
+		*destination = source
+		c.regI++; c.regJ++
 	}
 
 

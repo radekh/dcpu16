@@ -290,16 +290,16 @@ Instruction Set
 | 1 | 01111 | SHL b,a  | b &larr; b<<a, sets EX to ((b<<a)>>16)&0xffff
 |2+ | 10000 | IFB b,a  | performs next instruction only if (b&a)!=0
 |2+ | 10001 | IFC b,a  | performs next instruction only if (b&a)==0
-|2+ | 10010 | IFE b,a  |
-|2+ | 10011 | IFN b,a  |
-|2+ | 10100 | IFG b,a  |
-|2+ | 10101 | IFA b,a  |
-|2+ | 10110 | IFL b,a  |
-|2+ | 10111 | IFU b,a  |
+|2+ | 10010 | IFE b,a  | performs next instruction only if b==a
+|2+ | 10011 | IFN b,a  | performs next instruction only if b!=a
+|2+ | 10100 | IFG b,a  | performs next instruction only if b>a
+|2+ | 10101 | IFA b,a  | performs next instruction only if b>a (signed)
+|2+ | 10110 | IFL b,a  | performs next instruction only if b<a
+|2+ | 10111 | IFU b,a  | performs next instruction only if b<a (signed)
 |   | 11000 |          |
 |   | 11001 |          |
-| 3 | 11010 | ADX b,a  | b+a+EX->b
-| 3 | 11011 | SBX b,a  | b-a+EX->b
+| 3 | 11010 | ADX b,a  | b+a+EX->b, sets EX to 0x0001 if overflow, 0x0000 otherwise
+| 3 | 11011 | SBX b,a  | b-a+EX->b, sets EX to 0xFFFF if underflow, 0x0001 if overflow, 0x0000 otherwise
 |   | 11100 |          |
 |   | 11101 |          |
 | 2 | 11110 | STI b,a  | a->b, I++, J++
@@ -308,39 +308,39 @@ Instruction Set
 
 
 [Table of one operand instructions]
-| C | code  | mnemo | popis                              |
-|:-:|:-----:|:------|:-----------------------------------|
-|   | 00000 |       | _reserved_                         |
-| 3 | 00001 | JSR a |
-|   | 00010 |       |
-|   | 00011 |       |
-|   | 00100 |       |
-|   | 00101 |       |
-|   | 00111 |       |
-| 4 | 01000 | INT a | software interrupt with message a   |
-| 1 | 01001 | IAG a | IA->a                               |
-| 1 | 01010 | IAS a | a->IA                               |
-| 3 | 01011 | IAQ a |                                     |
-|   | 01100 |       |                                     |
-|   | 01101 |       |                                     |
-|   | 01110 |       |                                     |
-|   | 01111 |       |                                     |
-| 2 | 10000 | HWN a | počet připojených HW zařízení -> a  |
-| 4 | 10001 | HWQ a | informace o zařízení a -> A,B,C,X,Y |
-|4+ | 10010 | HWI a | odeslání přerušení HW zařízení a    |
-|   | 10011 |       |                                     |
-|   | 10100 |       |                                     |
-|   | 10101 |       |                                     |
-|   | 10110 |       |                                     |
-|   | 10111 |       |                                     |
-|   | 11000 |       |                                     |
-|   | 11001 |       |                                     |
-|   | 11010 |       |                                     |
-|   | 11011 |       |                                     |
-|   | 11100 |       |                                     |
-|   | 11101 |       |                                     |
-|   | 11110 |       |                                     |
-|   | 11111 |       |                                     |
+| C | code  | mnemo | description                                    |
+|:-:|:-----:|:------|:-----------------------------------------------|
+|   | 00000 |       | _reserved for future expansion_                |
+| 3 | 00001 | JSR a | jump to subroutine: PUSH PC, PC=a              |
+|   | 00010 |       |                                                |
+|   | 00011 |       |                                                |
+|   | 00100 |       |                                                |
+|   | 00101 |       |                                                |
+|   | 00111 |       |                                                |
+| 4 | 01000 | INT a | triggers a software interrupt with message a   |
+| 1 | 01001 | IAG a | IA->a                                          |
+| 1 | 01010 | IAS a | a->IA                                          |
+| 3 | 01011 | RFI a |                                                |
+| 2 | 01100 | IAQ a |                                                |
+|   | 01101 |       |                                                |
+|   | 01110 |       |                                                |
+|   | 01111 |       |                                                |
+| 2 | 10000 | HWN a | sets a to number of connected hardware devices |
+| 4 | 10001 | HWQ a | sets A,B,C,X,Y to information about hardware   |
+|4+ | 10010 | HWI a | sends an interrupt to hardware a               |
+|   | 10011 |       |                                                |
+|   | 10100 |       |                                                |
+|   | 10101 |       |                                                |
+|   | 10110 |       |                                                |
+|   | 10111 |       |                                                |
+|   | 11000 |       |                                                |
+|   | 11001 |       |                                                |
+|   | 11010 |       |                                                |
+|   | 11011 |       |                                                |
+|   | 11100 |       |                                                |
+|   | 11101 |       |                                                |
+|   | 11110 |       |                                                |
+|   | 11111 |       |                                                |
 
 
 ### STI
