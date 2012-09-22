@@ -1,34 +1,17 @@
 <?php
   /*
-   * GitHub Post-Receive Hook target.
-   * http://badsyntax.co/post/github-web-hook-post-receive
+   * GitHub Post-Receive Hook target
    * For project dcpu16
    */
-
-$LOGDIR='/var/log/github'
-
 # Turn off error reporting
 error_reporting(0);
 
-try {
-	# Decode the payload json string
-	$payload = json_decode($_REQUEST['payload']);
-} catch(Exception $e) {
-	exit;
-}
-
-file_put_contents('logs/github0.txt', 'Payload:', FILE_APPEND);
-file_put_contents('logs/github0.txt', print_r($payload, TRUE), FILE_APPEND);
-
-# Pushed to master?
-if ($payload->ref === 'refs/heads/master') {
-	# Log the payload object
-	@file_put_contents('logs/github.txt', print_r($payload, TRUE), FILE_APPEND);
-
-	# Prep the URL - replace https protocol with git protocol to prevent 'update-server-info' errors
-	$url = str_replace('https://', 'git://', $payload->repository->url);
-
+file_put_contents('/tmp/hook.log', posix_geteuid()."\n", FILE_APPEND);
+# Check the incoming request IP
+$github_ips = array('207.97.227.253', '50.57.128.197', '108.171.174.178');
+if(in_array($_SERVER['REMOTE_ADDR'],$github_ips)) {
 	# Run the build script as a background process
-	`./build.sh ${url} {$payload->repository->name} > /dev/null 2>&1 &`;
+	#`./dcpu16.sh 'git://github.com/radekh/dcpu16.git' 'dcpu16' > /dev/null 2>&1 &`;
+	shell_exec('/home/radek/bin/github-dcpu16-post-receive.sh >/tmp/post-receive.log 2>&1 &');
 }
 ?>
