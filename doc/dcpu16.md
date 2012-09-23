@@ -5,6 +5,7 @@ css:		documentation.css
 css:			local.css
 HTML header:	<meta http-equiv="refresh" content="120"/>
 HTML header:	<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
+License:	GPLv3
 
 
 DCPU-16
@@ -16,6 +17,8 @@ DCPU-16
 
 > This document is in very early stage, and some parts were not yet
 > translated to english.
+
+> This document is published under GPLv3 license or [CC BY-NC-SA 3.0](http://creativecommons.org/licenses/by-nc-sa/3.0/)
 
 This document is about DCPU-16 computer as introduced by Markus
 Persson also known as Notch.  Markus created description of this
@@ -37,6 +40,7 @@ Links:
 
 Known DCPU-16 specifications:
 
+* [Version 1.1](http://0x10c.com/doc/dcpu-16.txt)
 * [Version 1.7](http://pastebin.com/raw.php?i=Q4JvQvnM)
 
 In this document I want stay as actual as possible.  So I use last
@@ -71,22 +75,22 @@ For Linux:
 * github: [dcpu16-go](https://github.com/dcpu16/dcpu16-go), go
 
 
-Nástroje
---------
+Tools
+-----
 
 * github: Wilduck / [dcpu16-mode](https://github.com/Wilduck/dcpu16-mode) -- An Emacs major mode for editing DCPU-16 Assembly
 * [Benedek's Domain - DCPU-16 Emulator and Assembler](http://n.ethz.ch/~vartokb/dcpu.html) -- 
 * github: Janiczek / [cfs-dcpu16](https://github.com/Janiczek/cfs-dcpu16)
 
 
-Vývojové nástroje
------------------
+Develpment Tools
+----------------
 
 ### Benedek's DCPU-16
 
-Simulátor a assembler.
+Simulator and assembler.
 
-Kompiluje se bez problémů.  Je třeba nainstalovat knihovnu libsdl.
+Builds without troubles.  Libsdl library is needed.
 
     # aptitude install libsdl-dev
     $ make
@@ -106,11 +110,11 @@ Kompiluje se bez problémů.  Je třeba nainstalovat knihovnu libsdl.
 * [dcpubin](http://www.dcpubin.com/)  spec 1.1?
 * [0x10co.de](http://0x10co.de/)
 
-### Assemblery
+### Assemblers
 
 * [F1DE](http://fasm.elasticbeanstalk.com/) -- webový assembler a simulátor
 
-### Překladače jazyka C
+### C compillers
 
 * [llvm-dcpu16](https://github.com/llvm-dcpu16/llvm-dcpu16) -- llvm backend for dcpu16
 
@@ -119,8 +123,8 @@ Kompiluje se bez problémů.  Je třeba nainstalovat knihovnu libsdl.
 * [hellige's goForth](https://github.com/hellige/dcpu)
 * [CamelForth-16 for DCPU](https://github.com/dsmvwld/CamelForth-16)
 
-Programy a knihovny
--------------------
+Programs and libraries
+----------------------
 
 * Mappum’s web emulator [0x10co.de](http://0x10co.de/) -- Web Library of programs
 * [Your DCPU](http://your-dcpu.com) -- Web library and development
@@ -238,122 +242,242 @@ There are two basic form of the instruction word.
 If OPCODE is zero, then the instruction is one operand instruction.
 
     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
-    |      OPERAND (a)      |      OPCODE       | 0   0   0   0   0 |
+    |      OPERAND (a)      |    OPCODE != 0    | 0   0   0   0   0 |
     +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Proposed no operand instruction word.  Because of 6 bits field there
+can be up to 64 instructions of class no and/or implicit operand.
+
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    |        OPCODE         | 0   0   0   0   0 | 0   0   0   0   0 |
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
 
 In the source operand is usually refered as *a* and the destination
 operand as *b*.
 
 
 [Operand encoding, 5 or 6 bits]
-| C |   code      | popis       |
-|:-:|------------:|:------------|
-| 0 | `0x00-0x07` | registry A, B, .... v tomto pořadí |
-| 0 | `0x08-0x0f` | [registr] -- v registru je adresa  |
-| 1 | `0x10-0x17` | [register + next word ]            |
-| 0 | `0x18`      | (PUSH / \[--SP]) if in b, or (POP / \[SP++]) if in a
-| 0 | `0x19`      | \[SP] / PEEK
-| 1 | `0x1a`      | [SP + next word ] / PICK n
-| 0 | `0x1b`      | SP
-| 0 | `0x1c`      | PC
-| 0 | `0x1d`      | EX
-| 1 | `0x1e`      | [next word]
-| 1 | `0x1f`      | next word (literal)
-| 0 | `0x20-0x3f` | litaral value 0xffff-0x1e (-1..30) (literal) only for a
+| C |   code      | mnemo  | description          |
+|:-:|------------:|:-------|:---------------------|
+| 0 | `0x00-0x07` | R      | registry A, B, .... v tomto pořadí |
+| 0 | `0x08-0x0f` | [R]    | [registr] -- v registru je adresa  |
+| 1 | `0x10-0x17` | [R+n]  | [register + next word ]            |
+| 0 | `0x18`      | PUSH/POP| (PUSH / \[--SP]) if in b, or (POP / \[SP++]) if in a
+| 0 | `0x19`      |        | \[SP] / PEEK         |
+| 1 | `0x1a`      |        | [SP + next word ] / PICK n
+| 0 | `0x1b`      | SP     | Stack Pointer        |
+| 0 | `0x1c`      | PC     | Program Counter      |
+| 0 | `0x1d`      | EX     | Overflow/EX          |
+| 1 | `0x1e`      | [n]    | [next word]          |
+| 1 | `0x1f`      | n      | next word (literal)  |
+| 0 | `0x20-0x3f` | n      | litaral value 0xffff-0x1e (-1..30) (literal) only for a
 
 Operand encodings is same for both, source and destination, operands.  Exceptions are:
 
 * literal values, code 0x20-0x3f, are possible only in source operand.  Because of this source operand has six bits and destination only five.
 * stack operation, operand code 0x18, is POP in source operand and means PUSH in destination operand
 
+Presenting of some operands
+
+    0x0000:                     ; Operands
+    0x0000: 8801                        set a,1
+    0x0001: 7c21 0040                   set b,64
+    0x0003: 7801 0040                   set a,[0x0040]
+    0x0005: 4401 0005                   set a,[b+5]
+    0x0007: 0701                        set push,b
+    0x0008: 0701                        set [--SP],b
+    0x0009: 6021                        set b,pop
+    0x000a: 6021                        set b,[SP++]
+    0x000b: 6441                        set c,peek
+    0x000c: 6441                        set c,[SP]
+    0x000d: 0b21                        set peek,c
+    0x000e: 0b21                        set [sp],c
+    0x000f: 6801 0004                   set a,[SP+4]
+    0x0011: 6801 0004                   set a,[pick+4]
+    0x0013: 0341 0004                   set [sp+4],a
+    0x0015: 0341 0004                   set [pick+4],a
+    0x0017: 8ba1                        set ex,1
+    0x0018: c7c1 0041                   set [0x41],16
+    0x001a: 7fc1 1234 0042              set [0x42],0x1234
+    0x001d: 8b81                        set pc, 1
 
 Instruction Set
 ---------------
 
-| C |opcode | mnemonic | popis
-|:-:|:------|:---------|:---------------------
-|   | 00000 |          | _special and one operand instructions_
-| 1 | 00001 | SET b,a  | a->b
-| 2 | 00010 | ADD b,a  | b+a->b; update Overflow
-| 2 | 00011 | SUB b,a  | b-a->b; update Overflow
-| 2 | 00100 | MUL b,a  | b*a->b, unsigned; EX
-| 2 | 00101 | MLI b,a  | like MUL but a and b signed
-| 3 | 00110 | DIV b,a  | sets b to b/a, sets EX to ((b<<16)/a)&0xffff. if a==0, sets b and EX to 0 instead. (treats b, a as unsigned)
-| 3 | 00111 | DVI b,a  | like DIV, but treat b, a as signed. Rounds towards 0
-| 3 | 01000 | MOD b,a  | sets b to b%a. if a==0, sets b to 0 instead.
-| 3 | 01001 | MDI b,a  | like MOD, but treat b, a as signed. (MDI -7, 16 == -7)
-| 1 | 01010 | AND b,a  | b&a->b
-| 1 | 01011 | BOR b,a  | b\|a->b
-| 1 | 01100 | XOR b,a  | b^a->b
-| 2 | 01101 | SHR b,a  | b= b>>>a; sets EX to ((b<<16)>>a)&0xffff (logical shift)
-| 1 | 01110 | ASR b,a  | b= b>>a; sets EX to ((b<<16)>>>a)&0xffff (arithmetic shift) (treats b as signed)
-| 1 | 01111 | SHL b,a  | b &larr; b<<a, sets EX to ((b<<a)>>16)&0xffff
-|2+ | 10000 | IFB b,a  | performs next instruction only if (b&a)!=0
-|2+ | 10001 | IFC b,a  | performs next instruction only if (b&a)==0
-|2+ | 10010 | IFE b,a  | performs next instruction only if b==a
-|2+ | 10011 | IFN b,a  | performs next instruction only if b!=a
-|2+ | 10100 | IFG b,a  | performs next instruction only if b>a
-|2+ | 10101 | IFA b,a  | performs next instruction only if b>a (signed)
-|2+ | 10110 | IFL b,a  | performs next instruction only if b<a
-|2+ | 10111 | IFU b,a  | performs next instruction only if b<a (signed)
-|   | 11000 |          |
-|   | 11001 |          |
-| 3 | 11010 | ADX b,a  | b+a+EX->b, sets EX to 0x0001 if overflow, 0x0000 otherwise
-| 3 | 11011 | SBX b,a  | b-a+EX->b, sets EX to 0xFFFF if underflow, 0x0001 if overflow, 0x0000 otherwise
-|   | 11100 |          |
-|   | 11101 |          |
-| 2 | 11110 | STI b,a  | a->b, I++, J++
-| 2 | 11111 | STD b,a  | a->b, I--, J--
+| C |opcode | mnemonic  | short description
+|:-:|:------|:----------|:---------------------
+|   | 00000 |           | _special and one operand instructions_
+| 1 | 00001 | [SET] b,a | b&larr;a
+| 2 | 00010 | [ADD] b,a | b&larr;b+a; update Overflow in EX
+| 2 | 00011 | SUB b,a   | b-a->b; update Overflow
+| 2 | 00100 | MUL b,a   | b*a->b, unsigned; EX
+| 2 | 00101 | MLI b,a   | like MUL but a and b signed
+| 3 | 00110 | DIV b,a   | sets b to b/a, sets EX to ((b<<16)/a)&0xffff. if a==0, sets b and EX to 0 instead. (treats b, a as unsigned)
+| 3 | 00111 | DVI b,a   | like DIV, but treat b, a as signed. Rounds towards 0
+| 3 | 01000 | MOD b,a   | sets b to b%a. if a==0, sets b to 0 instead.
+| 3 | 01001 | MDI b,a   | like MOD, but treat b, a as signed. (MDI -7, 16 == -7)
+| 1 | 01010 | AND b,a   | b&a->b
+| 1 | 01011 | BOR b,a   | b\|a->b
+| 1 | 01100 | XOR b,a   | b^a->b
+| 2 | 01101 | SHR b,a   | b= b>>>a; sets EX to ((b<<16)>>a)&0xffff (logical shift)
+| 1 | 01110 | ASR b,a   | b= b>>a; sets EX to ((b<<16)>>>a)&0xffff (arithmetic shift) (treats b as signed)
+| 1 | 01111 | SHL b,a   | b &larr; b<<a, sets EX to ((b<<a)>>16)&0xffff
+|2+ | 10000 | IFB b,a   | performs next instruction only if (b&a)!=0
+|2+ | 10001 | IFC b,a   | performs next instruction only if (b&a)==0
+|2+ | 10010 | IFE b,a   | performs next instruction only if b==a
+|2+ | 10011 | IFN b,a   | performs next instruction only if b!=a
+|2+ | 10100 | IFG b,a   | performs next instruction only if b>a
+|2+ | 10101 | IFA b,a   | performs next instruction only if b>a (signed)
+|2+ | 10110 | IFL b,a   | performs next instruction only if b<a
+|2+ | 10111 | IFU b,a   | performs next instruction only if b<a (signed)
+|   | 11000 |           | |
+|   | 11001 |           | |
+| 3 | 11010 | ADX b,a   | b+a+EX->b, sets EX to 0x0001 if overflow, 0x0000 otherwise
+| 3 | 11011 | SBX b,a   | b-a+EX->b, sets EX to 0xFFFF if underflow, 0x0001 if overflow, 0x0000 otherwise
+|   | 11100 |           | |
+|   | 11101 |           | |
+| 2 | 11110 | [STI] b,a | a->b, I++, J++
+| 2 | 11111 | [STD] b,a | a->b, I--, J--
 [Table of two operand instructions]
+
+The definition of [ADX] and [SBX] is subject of changes.  There was a
+discussion about the definition of these.  As a result the definition
+can change.
 
 
 [Table of one operand instructions]
-| C | code  | mnemo | description                                    |
-|:-:|:-----:|:------|:-----------------------------------------------|
-|   | 00000 |       | _reserved for future expansion_                |
-| 3 | 00001 | JSR a | jump to subroutine: PUSH PC, PC=a              |
-|   | 00010 |       |                                                |
-|   | 00011 |       |                                                |
-|   | 00100 |       |                                                |
-|   | 00101 |       |                                                |
-|   | 00111 |       |                                                |
-| 4 | 01000 | INT a | triggers a software interrupt with message a   |
-| 1 | 01001 | IAG a | IA->a                                          |
-| 1 | 01010 | IAS a | a->IA                                          |
-| 3 | 01011 | RFI a |                                                |
-| 2 | 01100 | IAQ a |                                                |
-|   | 01101 |       |                                                |
-|   | 01110 |       |                                                |
-|   | 01111 |       |                                                |
-| 2 | 10000 | HWN a | sets a to number of connected hardware devices |
-| 4 | 10001 | HWQ a | sets A,B,C,X,Y to information about hardware   |
-|4+ | 10010 | HWI a | sends an interrupt to hardware a               |
-|   | 10011 |       |                                                |
-|   | 10100 |       |                                                |
-|   | 10101 |       |                                                |
-|   | 10110 |       |                                                |
-|   | 10111 |       |                                                |
-|   | 11000 |       |                                                |
-|   | 11001 |       |                                                |
-|   | 11010 |       |                                                |
-|   | 11011 |       |                                                |
-|   | 11100 |       |                                                |
-|   | 11101 |       |                                                |
-|   | 11110 |       |                                                |
-|   | 11111 |       |                                                |
+| C | code  | mnemo   | description                                    |
+|:-:|:-----:|:--------|:-----------------------------------------------|
+|   | 00000 |         | _reserved for future expansion_                |
+| 3 | 00001 | JSR a   | jump to subroutine: PUSH PC, PC=a              |
+|   | 00010 |         |                                                |
+|   | 00011 |         |                                                |
+|   | 00100 |         |                                                |
+|   | 00101 |         |                                                |
+|   | 00111 |         |                                                |
+| 4 | 01000 | [INT] a | triggers a software interrupt with message a   |
+| 1 | 01001 | IAG a   | IA->a                                          |
+| 1 | 01010 | IAS a   | a->IA                                          |
+| 3 | 01011 | RFI a   |                                                |
+| 2 | 01100 | IAQ a   |                                                |
+|   | 01101 |         |                                                |
+|   | 01110 |         |                                                |
+|   | 01111 |         |                                                |
+| 2 | 10000 | HWN a   | sets a to number of connected hardware devices |
+| 4 | 10001 | HWQ a   | sets A,B,C,X,Y to information about hardware   |
+|4+ | 10010 | HWI a   | sends an interrupt to hardware a               |
+|   | 10011 |         |                                                |
+|   | 10100 |         |                                                |
+|   | 10101 |         |                                                |
+|   | 10110 |         |                                                |
+|   | 10111 |         |                                                |
+|   | 11000 |         |                                                |
+|   | 11001 |         |                                                |
+|   | 11010 |         |                                                |
+|   | 11011 |         |                                                |
+|   | 11100 |         |                                                |
+|   | 11101 |         |                                                |
+|   | 11110 |         |                                                |
+|   | 11111 |         |                                                |
+
+Next part are description of each instruction.
+
+### ADD -- Addition [ADD]
+
+    ADD b,a
+
+#### Description
+
+Value described by source operand a is added to register or memory
+described by operand b and the result is stored back top register or
+memory described by operand b.  As a result of this addition, register
+EX is updated.
+
+If result of `a+b` is lower then 0x10000, it means there is no
+overlow, EX is set to zero (0x0000).  Otherwise if the result is
+higher or equal 0x10000, the EX is set to one (0x0001).
+
+     15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    |      SOURCE (a)       |  DESTINATION (b)  | 0   0   0   1   0 |
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Base Opcode: 0x0002
+
+See also: [ADX], [SBX], [SUB]
+
+### SET
+
+> Set
+
+    SET b,a
+
+> Value described by source operand a is transferred/copied to register or memory described by operand b.
+
+     15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    |      SOURCE (a)       |  DESTINATION (b)  | 0   0   0   0   1 |
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Base Opcode: 0x0001
+
 
 
 ### STI
+
+> Set and Increment
 
     STI b,a
 
 > a->b, I++, J++
 
+     15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    |      SOURCE (a)       |  DESTINATION (b)  | 1   1   1   1   0 |
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Base Opcode: 0x001e
+
 ### STD
+
+> Set and Decrement
 
     STD b,a
 
 > b->a, I--, J--
+
+     15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    |      SOURCE (a)       |  DESTINATION (b)  | 1   1   1   1   1 |
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Base Opcode: 0x001f
+
+### SUB -- Subtract [SUB]
+
+    SUB b,a
+
+> b - a &rarr; b; overflow&rarr;EX
+
+#### Description
+
+Value described by operand **a** is subtracted from value described by
+operand **b**.  The result of the subtraction is stored back into
+register or memory described by operand **b**.
+
+As a result, **EX** register is updated.
+
+
+     15  14  13  12  11  10   9   8   7   6   5   4   3   2   1   0
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+    |      SOURCE (a)       |  DESTINATION (b)  | 0   0   0   1   1 |
+    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+Base Opcode: 0x0003
+
+See also: [ADD], [ADX], [SBX]
+
 
 Interrupts
 ----------
@@ -476,7 +600,34 @@ Volání virtuální funkce podle [ratchetfreak].
     jsr X
 
 
+Small and big projects for DCPU16
+---------------------------------
+
+> This is about programs running on DCPU16.
+
+* [HerobrinesArmy / ChaOS](https://github.com/HerobrinesArmy/ChaOS)
+
+
 [ratchetfreak]: http://0x10cforum.com/profile/2070695
+
+
+### Assembler for DCPU16 assembly language
+
+> Notes for construction of such an assembler.
+
+Each line can contain label, instruction and its opperands and
+comment.  Label if provided must be first part of the line and should
+start with ':'.  Is then separated from the rest of the line by white
+space(s).
+
+Instruction is mnemonic name of the instruction.
+
+Operands follow the instruction mnemonic name and could be zero, one
+or two and spearated by coma ','.
+
+Anything on the line, including and following semicolon ';', is comment.
+
+
 
 <!--
 Local Variables:

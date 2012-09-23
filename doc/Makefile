@@ -8,7 +8,8 @@ DESTDIR := ../html
 HTMLS = $(subst .md,.html,$(shell ls *.md))
 
 all: $(HTMLS)
-	rsync $(HTMLS) *.css $(DESTDIR)
+
+#	rsync $(HTMLS) *.css $(DESTDIR)
 
 # Generic rules
 %.html: %.md
