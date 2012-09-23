@@ -1222,6 +1222,29 @@ func Test_Instruction_ADX(t *testing.T) {
 	if c.regPC != 7     {t.Errorf("Fail: PC is %#.4x and should be 0x0007\n", c.regPC)}
 
 }
+/*
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=9pqx01
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=q206qq
+ URL:  http://www.0x10cforum.com/forum/m/4932880/viewthread/2964261-which-result-correct-for-sbx
+ *
+0x0000:                     ; Testin ADX big overflow
+0x0000: 8001                    set a,0xffff
+0x0001: 8021                    set b,0xffff
+0x0002: 83a1                    set ex,0xffff
+0x0003: 041a                    adx a,b
+0x0004:                     ; Checkpoint: a=0xfffd,ex=2
+ */
+func Test_Instruction_ADX_big_overflow(t *testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x8001
+	c.memory[1] = 0x8021
+	c.memory[2] = 0x83a1
+	c.memory[3] = 0x041a
+	c.Step(); c.Step(); c.Step(); c.Step()	// set,set,set,adx
+	if c.cycle != 6      {t.Errorf("Fail: cycle is %d and should be 6\n", c.cycle)}
+	if c.regA  != 0xfffd {t.Errorf("Fail: A  is %#.4x and should be 0xfffd\n", c.regA)}
+	if c.regEX != 2      {t.Errorf("Fail: EX is %#.4x and should be 0x0002\n", c.regEX)}
+}
 
 func Benchmark_ADX_0xFFFF(b *testing.B) {
 	b.StopTimer()
@@ -1239,6 +1262,12 @@ func Benchmark_ADX_0xFFFF(b *testing.B) {
 	}	
 }
 
+/*
+ Discussions about the definition of EX value in SUB,SBX and probably ADD,ADX instructions.
+ URL: http://www.reddit.com/r/dcpu16/comments/t4uuq/where_is_the_17_spec_with_the_sbx_fix/
+ URL: http://www.reddit.com/r/dcpu16/comments/t4uuq/where_is_the_17_spec_with_the_sbx_fix/c4jmkyp
+ */
+
 /* Testing instruction SBX
  PRIV: http://fasm.elasticbeanstalk.com/?proj=sf1my3
  PUB:  http://fasm.elasticbeanstalk.com/?proj=h95cgk
@@ -1247,11 +1276,11 @@ func Benchmark_ADX_0xFFFF(b *testing.B) {
 0x0000: 83a1                    set ex,0xffff   ;cyc=1
 0x0001: 7c01 00ea               set a,234       ;cyc=1+1
 0x0003: 901b                    sbx a,3         ;cyc=3
-0x0004:                     ; Checkpoint: a=230,ex=0
+0x0004:                     ; Checkpoint: a=0x00e6,ex=0x1
 0x0004: 901b                    sbx a,3         ;cyc=3
-0x0005:                     ; Checkpoint: a=227,ex=0
+0x0005:                     ; Checkpoint: a=0x00e4,ex=0
 0x0005: 7c1b 00e6               sbx a,230       ;cyc=3+1
-0x0007:                     ; Checkpoint: a=0xfffd=-3,ex=0xffff
+0x0007:                     ; Checkpoint: a=0xfffe=-2,ex=0xffff
  */
 func Test_Instruction_SBX(t *testing.T) {
 	c := New(); c.Reset()
@@ -1261,21 +1290,64 @@ func Test_Instruction_SBX(t *testing.T) {
 	c.memory[4] = 0x901b
 	c.memory[5] = 0x7c1b; c.memory[6] = 0x00e6
 	c.Step(); c.Step(); c.Step()	// set,set,sbx
+	t.Log("sbx a,3")
 	if c.cycle != 6      {t.Errorf("Fail: cycle is %d and should be 6\n", c.cycle)}
 	if c.regA  != 0x00e6 {t.Errorf("Fail: A  is %#.4x and should be 0x00e6\n", c.regA)}
-	if c.regEX != 0      {t.Errorf("Fail: EX is %#.4x and should be 0x0000\n", c.regEX)}
+	if c.regEX != 1      {t.Errorf("Fail: EX is %#.4x and should be 0x0001\n", c.regEX)}
 
+	t.Log("sbx a,3")
 	c.Step()
 	if c.cycle != 9      {t.Errorf("Fail: cycle is %d and should be 9\n", c.cycle)}
-	if c.regA  != 0x00e3 {t.Errorf("Fail: A  is %#.4x and should be 0x00e3\n", c.regA)}
+	if c.regA  != 0x00e4 {t.Errorf("Fail: A  is %#.4x and should be 0x00e4\n", c.regA)}
 	if c.regEX != 0      {t.Errorf("Fail: EX is %#.4x and should be 0x0000\n", c.regEX)}
 
+	t.Log("sbx a,230")
 	c.Step()
 	if c.cycle != 13     {t.Errorf("Fail: cycle is %d and should be 13\n", c.cycle)}
-	if c.regA  != 0xfffd {t.Errorf("Fail: A  is %#.4x and should be 0xfffd\n", c.regA)}
+	if c.regA  != 0xfffe {t.Errorf("Fail: A  is %#.4x and should be 0xfffe\n", c.regA)}
 	if c.regEX != 0xffff {t.Errorf("Fail: EX is %#.4x and should be 0xffff\n", c.regEX)}
 }
 
+/*
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=fb21dp
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=l2j3v1
+ URL:  http://www.0x10cforum.com/forum/m/4932880/viewthread/2964261-which-result-correct-for-sbx
+ *
+0x0000:                     ; Testing Overflow of SBX
+0x0000: 8401                    set a, 0x0      ;cyc=1
+0x0001: 8821                    set b, 0x1      ;cyc=1
+0x0002: 041b                    sbx a, b        ;cyc=3
+0x0003:                     ; Checkpoint: a=0xffff=-1,ex=0xffff=-1
+0x0003: 881b                    sbx a, 1        ;cyc=3
+0x0004:                     ; Checkpoint: a=0xfffd=-3,ex=1
+0x0004: 881b                    sbx a, 1        ;cyc=3
+0x0005:                     ; Checkpoint: a=0xfffd=-3,ex=0
+ */
+func Test_Instruction_SBX_overflow(t* testing.T) {
+	c := New(); c.Reset()
+	c.memory[0] = 0x8401
+	c.memory[1] = 0x8821
+	c.memory[2] = 0x041b
+	c.memory[3] = 0x881b
+	c.memory[4] = 0x881b
+	c.Step(); c.Step(); c.Step()	// set,set,sbx
+	t.Log("sbx a, b")
+	if c.cycle != 5      {t.Errorf("Fail: cycle is %d and should be 5\n", c.cycle)}
+	if c.regA  != 0xffff {t.Errorf("Fail: A  is %#.4x and should be 0xffff\n", c.regA)}
+	if c.regEX != 0xffff {t.Errorf("Fail: EX is %#.4x and should be 0xffff\n", c.regEX)}
+
+	t.Log("sbx a, 1")
+	c.Step()		// sbx a,1
+	if c.cycle != 8      {t.Errorf("Fail: cycle is %d and should be 8\n", c.cycle)}
+	if c.regA  != 0xfffd {t.Errorf("Fail: A  is %#.4x and should be 0xfffd\n", c.regA)}
+	if c.regEX != 0x0001 {t.Errorf("Fail: EX is %#.4x and should be 0x0001\n", c.regEX)}
+
+	t.Log("sbx a, 1")
+	c.Step()		// sbx a,1
+	if c.cycle != 11     {t.Errorf("Fail: cycle is %d and should be 11\n", c.cycle)}
+	if c.regA  != 0xfffd {t.Errorf("Fail: A  is %#.4x and should be 0xfffd\n", c.regA)}
+	if c.regEX != 0x0000 {t.Errorf("Fail: EX is %#.4x and should be 0x0000\n", c.regEX)}
+}
 
 
 /* Testing instruction STI
@@ -1333,20 +1405,24 @@ func Test_Instruction_STD(t *testing.T) {
  *
 0x0000:                     ; Testing Instruction JSR
 0x0000: 7f61 0040               set sp,0x40     ;cyc=2
-0x0002: 9020                    jsr routine
-0x0003:                     ; Checkpoint: a=0x0a=10,i=5,j=7
+0x0002: 9020                    jsr routine     ;cyc=3
+0x0003:                     ; Checkpoint: a=0x0a=5
 0x0003:                     
 0x0003:                     :routine
-0x0003: 9801                    set a,5
+0x0003: 9801                    set a,5         ;cyc=1
+0x0004: 6381                    set pc,pop      ;cyc=1
  */
 func Test_Instruction_JSR(t *testing.T) {
 	c := New(); c.Reset()
 	c.memory[0] = 0x7f61; c.memory[1] = 0x0040
 	c.memory[2] = 0x9020
 	c.memory[3] = 0x9801
-	c.memory[4] = 0xffff
+	c.memory[4] = 0x6381
 	c.Step(); c.Step()	// set,jsr
 	if c.cycle != 5      {t.Errorf("Fail: cycle is %d and should be 5\n", c.cycle)}
 	if c.regPC != 0x0003 {t.Errorf("Fail: PC  is %#.4x and should be 0x0003\n", c.regPC)}
 	if c.regSP != 0x003f {t.Errorf("Fail: SP  is %#.4x and should be 0x003f\n", c.regSP)}
+
+	c.Step(); c.Step()	// set,ret
+	if c.regPC != 0x0003 {t.Errorf("Fail: PC  is %#.4x and should be 0x0003\n", c.regPC)}
 }

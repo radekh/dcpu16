@@ -208,7 +208,7 @@ func (c *Cpu) Step() {
 		c.regEX = Word(result >>16)
 	case 27: // SBX: b=b-a+EX, sets EX to 0xFFFF if there is an underflow, 0x0 otherwise
 		c.cycle +=3
-		result := int32(*destination) - int32(source) + int32(SWord(c.regEX))
+		result := int32(*destination) - int32(source) + int32(Word(c.regEX))
 		*destination = Word(result)
 		c.regEX = Word(result >>16)
 

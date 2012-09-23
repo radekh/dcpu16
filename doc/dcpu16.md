@@ -272,7 +272,7 @@ Instruction Set
 
 | C |opcode | mnemonic | popis
 |:-:|:------|:---------|:---------------------
-|   | 00000 |          | special and one operand instructions
+|   | 00000 |          | _special and one operand instructions_
 | 1 | 00001 | SET b,a  | a->b
 | 2 | 00010 | ADD b,a  | b+a->b; update Overflow
 | 2 | 00011 | SUB b,a  | b-a->b; update Overflow
