@@ -663,6 +663,39 @@ func Test_Instruction_DVI_2_0(t *testing.T) {
 
 
 /*
+ PRIV: http://fasm.elasticbeanstalk.com/?proj=lynbt3
+ PUB:  http://fasm.elasticbeanstalk.com/?proj=yj28p2
+ URL:  http://www.0x10cforum.com/forum/m/4932880/viewthread/2945688-17-f1de-latest-update/page/3
+ DVI definition is broken by design.
+ *
+0x0000:                     ; Testing DVI
+0x0000: 7c01 fffd               set a,-3
+0x0002: 9407                    dvi a,4
+0x0003:                     ; Checkpoint: a=,ex=
+0x0003: 8801                    set a,1
+0x0004: 9407                    dvi a,4
+0x0005:                     ; Checkpoint: a=,ex=
+*/
+func Test_Instruction_DVI_(t *testing.T) {
+	c := New()
+	c.memory[0] = 0x7c01; c.memory[1] = 0xfffd
+	c.memory[2] = 0x9407
+	c.memory[3] = 0x8801
+	c.memory[4] = 0x9407
+	c.Step(); c.Step()
+	//if c.cycle != 5      {t.Errorf("Fail: cycle is %d and should be 5\n", c.cycle)}
+	//if c.regA  != 0xffff {t.Errorf("Fail: A   is %#.4x and should be 0xffff\n", c.regA)}
+	if c.regEX != 0x4000 {t.Errorf("Fail: EX  is %#.4x and should be 0x4000\n", c.regEX)}
+	c.Step(); c.Step()
+	//if c.cycle != 5      {t.Errorf("Fail: cycle is %d and should be 5\n", c.cycle)}
+	if c.regA  != 0x0000 {t.Errorf("Fail: A   is %#.4x and should be 0x0000\n", c.regA)}
+	if c.regEX != 0x4000 {t.Errorf("Fail: EX  is %#.4x and should be 0x4000\n", c.regEX)}
+}
+
+
+
+
+/*
 0x0000:                     ; Testing MOD 12/5
 0x0000: b421                    set b,12
 0x0001: 9828                    mod b,5
